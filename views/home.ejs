@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>Affiliate Products</title>
+  <link rel="stylesheet" href="/css/style.css"> <!-- Link to your CSS file -->
+</head>
+<%-include ('header') -%>
+
+<body>
+  <h1>Affiliate Products</h1>
+
+
+
+<div class="m-3">    <div class="row">
+  <div class="col-4 card"><p>nav bar</p></div>
+<div class="col-7 ms-3">
+<% products.forEach(product => { %>
+<div class="row card">
+ <h5> <%= product.title %></h5>
+ <p> <%= product.description %></p>
+ <p> $<%= product.price %></p>
+</div>
+<% }); %>
+</div>
+</div>
+
+</div>
+</body>
+</html>

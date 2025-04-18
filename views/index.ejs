@@ -1,0 +1,57 @@
+<%-include ('header') -%>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Affiliate Products</title>
+  <link rel="stylesheet" href="public/css/style.css">
+  <style>
+    body {
+    font-family: sans-serif;
+    margin: 20px;
+  }
+  
+  .product-list {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .product-item {
+    width: 300px;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  .product-item img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  </style> <!-- Link to your CSS file -->
+</head>
+<body>
+  <h1>Affiliate Products</h1>
+
+  <div class="product- ">
+    <% products.forEach(product => { %>
+      <div class="product-item">
+        <h2><%= product.title %></h2>
+        <img src="<%= product.image_url %>" alt="<%= product.title %>">
+        <p><%= product.description %></p>
+        <p>Price: $<%= product.price %></p>
+        <a href="<%= product.affiliate_link %>" target="_blank" rel="noopener noreferrer">
+          Buy Now
+        </a>
+      </div>
+    <% }); %>
+  </div>
+
+  <footer class="container">
+   <div class="row">
+    <div class="col-3"><a href="register" class="btn card">Register</a></div> || <div class="col-3"> <a href="login" class="btn card">Login</a></div> 
+
+   </div>
+  </footer>
+</body>
+</html>

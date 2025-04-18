@@ -1,0 +1,16 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title><%= product.title %></title>
+          <link rel="stylesheet" href="/css/style.css">
+        </head>
+        <body>
+          <h1><%= product.title %></h1>
+          <img src="<%= product.image_url %>" alt="<%= product.title %>">
+          <p><%= product.description %></p>
+          <p>Price: $<%= product.price %></p>
+          <a href="<%= product.affiliate_link %>" target="_blank" rel="noopener noreferrer">
+            Buy Now
+          </a>
+        </body>
+        </html>
