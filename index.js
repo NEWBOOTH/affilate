@@ -16,11 +16,12 @@ const LRU = require('lru-cache');
 dotenv.config();
 
 app.use(session({
-  secret: 'your-secret-key',  // Replace with a strong, randomly generated secret
+  secret: 'secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // set to true if HTTPS
-}));
+  cookie: { maxAge: 60 * 60 * 1000 }
+}))
+
 
 // const db = knex({
 //   client: 'pg',
@@ -71,19 +72,39 @@ app.get('/', async (req, res) => {
 app.get('/login', async function(req,res){
    res.render('login')
 })
-app.post('/login', async function(req,res){
-  const email = req.body.email;
-  const password = req.body.password;
-  const result = await pool.query('SELECT * FROM account WHERE email = $1 AND password = $2 RETURNING id', [email, password])
+app.post('/login', async function(req, res) {
+  try {
+    const email = req.body.email;
+    const password = req.body.password;
 
-  if(result) {
-    const id = result.rows[0].id
-    res.redirect(`account/${id}`)
-  }else {
-    res.send('enter the correct the infomation')
+    // 1. Retrieve the user from the database by email
+    const result = await pool.query('SELECT * FROM account WHERE email = $1', [email]);
+
+    if (result.rows.length === 0) {
+      return res.status(401).send('Invalid email or password');
+    }
+
+    const user = result.rows[0];
+
+    // 2. Compare the submitted password with the stored hash
+
+    if (password) {
+        // create the session object
+      req.session.user = {
+        id: user.id,
+        email: user.email,
+        fName: user.fname
+      };
+      // 3. Redirect to the user's account page or dashboard
+      res.redirect(`/account/${user.id}`);
+    } else {
+      return res.status(401).send('Invalid email or password'); // 401 Unauthorized
+    }
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).send('Login failed.');
   }
-
-})
+});
 app.get('/register', async function(req, res) {
   try {
       // No ID needed for registration form
