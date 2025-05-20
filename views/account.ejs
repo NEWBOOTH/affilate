@@ -43,13 +43,17 @@
                    <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <img src="<%- info.profilePictureUrl || '/images/default-avatar.png' %>" alt="Profile Picture" class="profile-picture img-fluid">
+                                <img src="<%- info.img_url || '/images/default-avatar.png' %>" alt="Profile Picture" class="profile-picture img-fluid">
                             </div>
                             <div class="col-md-8">
                                 <h5 class="card-title">Welcome <%- info.lname %></h5>
                                 <p class="card-text">Email: <%- info.email %></p>
                                 <p class="card-text">Balance: $0.00</p>
                                 <p class="card-text">Account ID: <%- info.id %></p>
+                                <p>refferal code: <%= info.referral_code %></p>
+                                <p>Balance: <%= info.balance %></p>
+                                <p>Number of People You Have Referred: <%= referredCount %></p>
+                                <a href="/profile">profile</a>
                                 <a href="#" class="btn btn-primary">Edit Profile</a>
                             </div>
                         </div>
@@ -58,8 +62,15 @@
             </div>
         </div>
     </div>
+    <div id="referral-link-section">
+        <p>Your referral link:</p>
+        '    '    <a href="/referral">refferral</a>
 
-    <footer class="footer mt-5 bg-light py-3">
+        <input type="text" id="referral-link" value="http://localhost:3000/register?referral=<%= info.referral_code %>" readonly class="card col-6">
+        <button id="copy-button">Copy Link</button>
+        <button id="share-button">Share</button>
+      </div>
+          <footer class="footer mt-5 bg-light py-3">
         <div class="container text-center">
             <span class="text-muted">&copy; 2023 Your Company</span>
         </div>
@@ -68,5 +79,54 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+  const referralLinkInput = document.getElementById('referral-link');
+  const copyButton = document.getElementById('copy-button');
+
+  copyButton.addEventListener('click', () => {
+    // Select the referral link text
+    referralLinkInput.select();
+    referralLinkInput.setSelectionRange(0, 99999); // For mobile Safari
+
+    try {
+      // Copy the text to the clipboard
+      document.execCommand('copy');
+      alert('Referral link copied to clipboard!'); // Provide feedback
+    } catch (err) {
+      console.error('Unable to copy referral link:', err);
+      alert('Failed to copy referral link. Please copy manually.');
+    }
+
+    // Deselect the text
+    window.getSelection().removeAllRanges();
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const referralLinkInput = document.getElementById('referral-link');
+  const shareButton = document.getElementById('share-button');
+
+  shareButton.addEventListener('click', async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Check out this awesome site!', // Customize the sharing title
+          text: 'Sign up with my referral link and get a bonus!', // Customize the sharing text
+          url: referralLinkInput.value,
+        });
+        console.log('Referral link shared successfully.');
+      } else {
+        alert('Web Share API is not supported in this browser. Please copy the link manually.');
+      }
+    } catch (error) {
+      console.error('Error sharing referral link:', error);
+      alert('Failed to share referral link. Please copy manually.');
+    }
+  });
+});
+
+
+    </script>
 </body>
 </html>

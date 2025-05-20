@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Referral Link Sharing</title>
+</head>
+<body>
+    <%-include ('header') -%>
+
+
+  <h1>Share Your Referral Link</h1>
+
+  <div id="referral-link-section">
+    <p>Your referral link:</p>
+    <input type="text" id="referral-link" value="YOUR_ACTUAL_REFERRAL_LINK" readonly>
+    <button id="copy-button">Copy Link</button>
+    <button id="share-button">Share</button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const referralLinkInput = document.getElementById('referral-link');
+      const copyButton = document.getElementById('copy-button');
+      const shareButton = document.getElementById('share-button');
+
+      copyButton.addEventListener('click', () => {
+        referralLinkInput.select();
+        referralLinkInput.setSelectionRange(0, 99999);
+        try {
+          document.execCommand('copy');
+          alert('Referral link copied to clipboard!');
+        } catch (err) {
+          console.error('Unable to copy referral link:', err);
+          alert('Failed to copy referral link. Please copy manually.');
+        }
+        window.getSelection().removeAllRanges();
+      });
+
+      shareButton.addEventListener('click', async () => {
+        try {
+          if (navigator.share) {
+            await navigator.share({
+              title: 'Check out this awesome site!',
+              text: 'Sign up with my referral link and get a bonus!',
+              url: referralLinkInput.value,
+            });
+            console.log('Referral link shared successfully.');
+          } else {
+            alert('Web Share API is not supported in this browser. Please copy the link manually.');
+          }
+        } catch (error) {
+          console.error('Error sharing referral link:', error);
+          alert('Failed to share referral link. Please copy manually.');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

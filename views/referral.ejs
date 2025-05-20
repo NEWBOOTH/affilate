@@ -1,0 +1,31 @@
+<%- include('head') %>
+
+<h1>Share Your Referral Link</h1>
+
+<p>Hello <% fname %></p>
+
+<p>Your Referral Code:</p>
+<label for="code">The code is <%= referralCode %></label>
+<br>
+
+<p>Your Referral Link:</p>
+<input type="text" id="referral-link" value="<%= referralLink %>" readonly class="col-6">
+<button id="copy-button">Copy Link</button>
+
+  <script>
+        function generateReferralLink() {
+            const referralCode = shortid.generate(); // Generate a unique referral code
+            const baseUrl = window.location.origin; // Base URL of your application
+            const referralLink = `${baseUrl}/register?referralCode=${referralCode}`;
+            document.getElementById('referralLink').value = referralLink;
+        }
+
+        function copyReferralLink() {
+            const referralLink = document.getElementById('referralLink').value;
+            copyToClipboard(referralLink);
+            alert('Referral link copied to clipboard!');
+        }
+
+        // Generate the referral link when the page loads
+        window.onload = generateReferralLink;
+    </script>

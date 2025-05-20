@@ -1,0 +1,17 @@
+<%-include ('head') -%>
+
+<h1 class="task-header">COMPLETE THE TASK</h1>
+
+<div class="container">
+  <% tasks.forEach(task => { %>
+    <div class="form-control m-3">
+      <h2><%= task.title %></h2>
+      <p>Description: <%= task.description %></p>
+      <a href="<%= task.link %>"><%= task.linkText %></a>
+      <% if (task.reward){ %>
+      <p>Reward: <%= task.reward %></p>
+      <% } %>
+    </div>
+  <% }); %>
+</div>
+

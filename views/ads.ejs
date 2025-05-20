@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad View Task</title>
+    <!-- Add Bootstrap CSS for styling (optional) -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Ad View Task</h1>
+        <p>View this ad to earn rewards!</p>
+        <!-- AdSense Ad Unit -->
+        <div id="ad-container">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9181887356906906"
+            crossorigin="anonymous"></script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+       </script>
+        </div>
+
+       <script>
+            let watched = false;
+            let rewardGiven = false;
+
+           // The ad shows and you can implement your backend to capture a response to verify
+
+           rewardGiven = true // In real life, verify the ad was watched
+
+            if (rewardGiven == true) {
+                console.log("Task Completed")
+            }
+           //  setTimeout(async ()=>{
+           //     console.log("Task Completed")
+           //  },30000); In real life, make it a little longer.
+       </script>
+
+    </div>
+</body>
+</html>
+
