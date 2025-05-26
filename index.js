@@ -16,6 +16,8 @@ const validator = require('validator');
 const LRU = require('lru-cache');
 const { log } = require('util');
 dotenv.config();
+const TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config();
 
 app.use(session({
   secret: 'secret',
@@ -46,8 +48,8 @@ function generateReferralCode() {
   return uuid.v4(); // Generate a UUID for uniqueness
 }
 
-
-
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const bot = new TelegramBot(token, { polling: true }); 
 const port = process.env.PORT || 5000; // Provide a default value
 
 app.use(cors());
@@ -63,38 +65,100 @@ app.use(express.static(path.join(__dirname, 'public')));
 //let id;
 // Route to display all products
 
+bot.onText(/\/start/, async (msg) => {
+  const chatId = msg.chat.id;
+  const telegramUserId = msg.from.id;
+  const telegramUsername = msg.from.username; // optional
 
-app.get('/tasks', async function(req, res) {
+  // 1. Get your application's user ID (you need to implement this)
+  const applicationUserId = await getApplicationUserIdFromTelegramChatId(chatId);
+
+  if (!applicationUserId) {
+    console.error(`Could not find user in your app for chat ID ${chatId}`);
+    bot.sendMessage(chatId, "Error: Could not link your Telegram account. Are you logged in on our website?");
+    return;
+  }
+
   try {
-    const tasks = [
-      {
-        title: "Task One",
-        description: "Kraven Kravinoff's complex relationship with his ruthless gangs most feared.",
-        link: "https://t.me/bpay_coin_bot/bpay_mini_app?startapp=task_45_6294293419",
-        linkText: "Task One Link",
-        reward: 1.5
-      },
-      {
-        title: "Task Two",
-        description: "Kraven Kravinoff's complex relationship with his ruthless gangs most feared.",
-        link: "https://example.com/task2", // Replace with your actual link
-        linkText: "Task Two Link",
-        reward: 3
-      },
-      {
-        title: "Task Three",
-        description: "Kraven Kravinoff's complex relationship with his ruthless gangs most feared.",
-        link: "https://example.com/task3", // Replace with your actual link
-        linkText: "Task Three Link",
-        reward: 1
-      }
-    ];
+    // 2. Store Telegram info in your database
+    const updateQuery = `
+      UPDATE account
+      SET telegram_user_id = $1, telegram_username = $2
+      WHERE id = $3;
+    `;
+    await pool.query(updateQuery, [telegramUserId, telegramUsername, applicationUserId]);
 
-    // 4. Render the Page:
-    res.render('task3', { tasks: tasks });
+    console.log(`Linked Telegram ID ${telegramUserId} and username @${telegramUsername} to user ID ${applicationUserId}`);
+    bot.sendMessage(chatId, `Your Telegram account (@${telegramUsername}) has been successfully linked!${chatId}`);
   } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).send('Server error fetching tasks.');
+    console.error('Error updating Telegram info:', error);
+    bot.sendMessage(chatId, "Error linking your Telegram account. Please try again later.");
+  }
+});
+                                  
+// Placeholder for your logic to get user ID from chatId
+async function getApplicationUserIdFromTelegramChatId(chatId) {
+  // Implement your logic here
+  // For example, query your database to find user by chatId
+  return 1; // Placeholder
+}
+
+app.get('/tasks/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).send('Invalid task ID.');
+    }
+
+    const result = await pool.query('SELECT * FROM account WHERE id = $1', [id]);
+    const info = result.rows[0];
+
+    const userId = req.session?.user?.id;
+    if (!userId) {
+      return res.status(401).send('Please log in.');
+    }
+
+    // Optionally, fetch user info if needed
+    res.render('task2', { info });
+  } catch (err) {
+    console.error('Error fetching task:', err);
+    res.status(500).send('Server error.');
+  }
+});
+async function isUserInChannel(userId) {
+  try {
+    const chatMember = await bot.getChatMember('@sfdxcgbhjklkhjghfgdjkbj', userId);
+    const status = chatMember.status;
+    // Possible statuses: 'creator', 'administrator', 'member', 'restricted', 'left', 'kicked'
+    return ['member', 'administrator', 'creator'].includes(status);
+  } catch (error) {
+    console.error('Error checking user membership:', error);
+    // If user not found or other error, treat as not a member
+    if (error.response && error.response.statusCode === 400 && error.response.body.description.includes('user not found')) {
+      return false;
+    }
+    return false;
+  }
+}
+app.post('/verify-task1', async (req, res) => {
+  if (!req.session?.user?.id) {
+    return res.status(401).send("Please log in to verify your task.");
+  }
+
+  const userId = 6294293419;
+
+  try {
+    
+
+    const isMember = await isUserInChannel(userId);
+    if (isMember) {
+      res.send("You have joined the Telegram channel! Task completed.");
+    } else {
+      res.send("You are not a member of the Telegram channel. Please join.");
+    }
+  } catch (err) {
+    console.error("Error verifying Telegram membership:", err);
+    res.status(500).send("Error verifying membership.");
   }
 });
 
@@ -106,7 +170,59 @@ app.get('/register', (req, res) => {
   // Render the registration form, passing the referral code
   res.render('register', { referral: referral });
 });
+app.get('/link-telegram', async function(req,res){
 
+  const result = await pool.query('SELECT * FROM account');
+  const info = result.rows[0];
+
+  res.render('teleInfo', { info })
+})
+app.post('/link-telegram', async (req, res) => {
+  const userId = req.session.user.id; // assuming user is logged in
+  const { telegram_user_id, telegram_username } = req.body;
+
+  // Validate inputs here (e.g., check if telegram_user_id is numeric)
+
+  try {
+    await pool.query(
+      'UPDATE account SET telegram_user_id = $1, telegram_username = $2 WHERE id = $3',
+      [telegram_user_id, telegram_username, userId]
+    );
+    res.redirect('/profile'); // or wherever you want to redirect
+  } catch (error) {
+    console.error('Error linking Telegram account:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+
+
+app.post('/verify-task1', async (req, res) => {
+  if (!req.session.user || !req.session.user.id) {
+    return res.status(401).send("Please log in to verify your task.");
+  }
+
+  const userId = req.session.user.id;
+  const userInfo = await getUserInfoFromDatabase(userId);
+  if (!userInfo || !userInfo.telegram_user_id) {
+    return res.send("Please connect your Telegram account first.");
+  }
+
+  const telegramUserId = userInfo.telegram_user_id;
+
+  try {
+    const isMember = await isUserInChannel(telegramUserId);
+    if (isMember) {
+      res.send("You have joined the Telegram channel! Task completed." + isMember);
+    } else {
+      res.send("You are not a member of the Telegram channel. Please join.");
+    }
+  } catch (error) {
+    console.error("Error verifying Telegram membership:", error);
+    res.status(500).send("Error verifying membership.");
+  }
+});
 
 app.get('/referral', async (req, res) => {
 
@@ -129,7 +245,7 @@ app.get('/referral', async (req, res) => {
     const referralLink = `http://${req.get('host')}/register?referral=${referral}`;
 
     // Render the referral page
-res.render('register', { user:user })
+res.render('referral', { user:user })
 
 });
 
@@ -184,45 +300,44 @@ app.get('/login', async function(req,res){
   res.render('login')
 })
 
-app.get('/copy', async function(req,res){
-  const query = 'SELECT * FROM account WHERE id = $1';
-  const id = parseInt(req.params.id)
-  const values = [id];
-  const result = await pool.query(query, values); 
-  const info = result.rows[0]
-  res.render('copy')
-})
-// Task Route:
-app.get('/tasks/:id', async function(req, res) {
-  try {
-    const query = 'SELECT * FROM account WHERE id = $1';
-    const id = parseInt(req.params.id)
-    const values = [id];
-    const result = await pool.query(query, values); 
-    const info = result.rows[0]
 
-    res.render('task2', {info:info});
+app.get('/account/:id', async function(req, res) {
+  try {
+    const accountId = parseInt(req.params.id);
+
+    // 1. Validate user input
+    if (isNaN(accountId) || accountId <= 0) {  // Ensure it's a positive integer
+      return res.status(400).send("Invalid account ID. Must be a positive integer.");
+    }
+
+    // 2. Fetch the account information
+    const query = 'SELECT * FROM account WHERE id = $1';
+    const values = [accountId];
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).send('Account not found.');
+    }
+
+    const info = result.rows[0];
+    const referral= 'SELECT COUNT(*) AS referral_count FROM account WHERE referred_by_user_id = $1';
+    const referralCountResult = await pool.query(referral, [accountId]);
+    const referralCount = parseInt(referralCountResult.rows[0].referral_count);
+
+    const ghValue = 0.50;
+    const balance = referralCount * ghValue;
+
+    // 3. Attach variables
+    const infoBalance = balance;
+
+    res.render('account', { info: info, referredCount: referralCount, infoBalance:infoBalance });
+
   } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).send('Server error fetching tasks.');
+    console.error('Error fetching account information:', error);
+    res.status(500).send('Error loading account information.');
   }
 });
 
-app.get('/:id', async (req, res) => {
-  try {
-
-    const query = 'SELECT * FROM account WHERE id = $1';
-    const id = parseInt(req.params.id)
-    const values = [id];
-    const result = await pool.query(query, values); 
-    const info = result.rows[0]
-    console.log(info)  // res.json(products)
-   res.render('home', {info:info });
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).send("Server error fetching products");
-  }
-});
 
 
 app.post('/login', async function(req, res) {
@@ -257,6 +372,22 @@ app.post('/login', async function(req, res) {
   }
 });
 
+app.get('/:id', async (req, res) => {
+  try {
+
+    const query = 'SELECT * FROM account WHERE id = $1';
+    const id = parseInt(req.params.id)
+    const values = [id];
+    const result = await pool.query(query, values); 
+    const info = result.rows[0]
+    console.log(info)  // res.json(products)
+   res.render('home', {info:info });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).send("Server error fetching products");
+  }
+});
+
 
 
 
@@ -265,7 +396,8 @@ app.post('/register', [
   body('fname').trim().isLength({ min: 1, max: 50 }).withMessage('First name must be between 1 and 50 characters'),
   body('lname').trim().isLength({ min: 1, max: 50 }).withMessage('Last name must be between 1 and 50 characters'),
   body('email').isEmail().withMessage('Invalid email address').normalizeEmail(),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+  body('telegramUsername')
 ], async function (req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -273,7 +405,7 @@ app.post('/register', [
   }
 
   try {
-    const { fname, lname, email, password } = req.body;
+    const { fname, lname, email, password, telegramUsername } = req.body;
 
     const newReferralCode = generateReferralCode();
 
@@ -303,9 +435,9 @@ app.post('/register', [
     }
 
     // 5. Insert the user data into the database
-    const insertQuery = `INSERT INTO account (fname, lname, email, password, referral_code, referred_by_user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id `;
+    const insertQuery = `INSERT INTO account (fname, lname, email, password, referral_code, referred_by_user_id, telegram_username) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id `;
 
-    const insertValues = [fname, lname, email, password, newReferralCode, referredByUserId];
+    const insertValues = [fname, lname, email, password, newReferralCode, referredByUserId, telegramUsername];
     const insertResult = await pool.query(insertQuery, insertValues);
 
     const newUserId = insertResult.rows[0].id;
@@ -329,44 +461,8 @@ app.post('/register', [
 
 
 
-app.get('/account/:id', async function(req, res) {
-  try {
-    const accountId = parseInt(req.params.id);
 
-    // 1. Validate user input
-    if (isNaN(accountId) || accountId <= 0) {  // Ensure it's a positive integer
-      return res.status(400).send("Invalid account ID. Must be a positive integer.");
-    }
 
-    // 2. Fetch the account information
-    const query = 'SELECT * FROM account WHERE id = $1';
-    const values = [accountId];
-    const result = await pool.query(query, values);
-
-    if (result.rows.length === 0) {
-      return res.status(404).send('Account not found.');
-    }
-
-    const info = result.rows[0];
-
-    // 3. Get the number of referrals made by this account
-    const referralCountQuery = `
-      SELECT COUNT(*) AS referred_count
-      FROM account
-      WHERE referred_by_user_id = $1
-    `;
-    const referralCountValues = [accountId];
-    const referralCountResult = await pool.query(referralCountQuery, referralCountValues);
-    const referredCount = referralCountResult.rows[0].referred_count;
-
-    // 4. Render the account page (assuming account.ejs exists)
-    res.render('account', { info: info, referredCount: referredCount });
-
-  } catch (error) {
-    console.error('Error fetching account information:', error);
-    res.status(500).send('Error loading account information.');
-  }
-});
 
 // --- Separate function for awarding referral bonus (called during registration) ---
 async function awardReferralBonus(refereeId) {
@@ -425,83 +521,6 @@ async function awardReferralBonus(refereeId) {
   }
 }
 
-
-// Route to display product details
-app.get('/products/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const product = await db('products').where({ id }).first();
-
-    if (!product) {
-      return res.status(404).send("Product not found");
-    }
-
-    res.render('product_details', { product: product });
-  } catch (error) {
-    console.error("Error fetching product details:", error);
-    res.status(500).send("Server error fetching product details");
-  }
-});
-// Display the referral link
-
-
-
-// Make sure you have a /tasks route that handles the user ID:
-
-// Function to approve a task submission and credit the user
-async function approveTaskSubmission(submissionId) {
-  try {
-    // 1. Get Submission and Task Details
-    const submissionQuery = `
-      SELECT ts.user_id, t.reward
-      FROM task_submissions ts
-      JOIN tasks t ON ts.task_id = t.id
-      WHERE ts.id = $1 AND ts.status = 'pending approval'
-    `;
-    const submissionValues = [submissionId];
-    const submissionResult = await pool.query(submissionQuery, submissionValues);
-
-    if (submissionResult.rows.length === 0) {
-      console.warn(`Submission not found or already processed: ${submissionId}`);
-      return false; // Indicate that the approval failed
-    }
-
-    const submission = submissionResult.rows[0];
-    const userId = submission.user_id;
-    const reward = submission.reward;
-
-    // 2. Update User Balance
-    const updateUserQuery = `
-      UPDATE users
-      SET balance = balance + $1
-      WHERE id = $2
-    `;
-    const updateUserValues = [reward, userId];
-    await pool.query(updateUserQuery, updateUserValues);
-
-    // 3. Update Submission Status
-    const updateSubmissionQuery = `
-      UPDATE task_submissions
-      SET status = 'approved'
-      WHERE id = $1
-    `;
-    const updateSubmissionValues = [submissionId];
-    await pool.query(updateSubmissionQuery, updateSubmissionValues);
-
-    console.log(`Submission ${submissionId} approved. User ${userId} credited with ${reward}`);
-    return true; // Indicate that the approval was successful
-
-  } catch (error) {
-    console.error("Error approving submission:", error);
-    return false; // Indicate that the approval failed
-  }
-}
-
-
-  
-app.post('/api/claimReward', function(req,res){
-  res.send('claimd')
-})
 app.listen(3000, function(){
     console.log('http://localhost:3000/register?referral=feb031fa-5bc9-47df-a8f2-5704f4245e97')
 })

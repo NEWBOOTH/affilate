@@ -40,31 +40,36 @@
                     <div class="card-header">
                       ACCOUNT  
                     </div>
-                   <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <img src="<%- info.img_url || '/images/default-avatar.png' %>" alt="Profile Picture" class="profile-picture img-fluid">
-                            </div>
-                            <div class="col-md-8">
-                                <h5 class="card-title">Welcome <%- info.lname %></h5>
-                                <p class="card-text">Email: <%- info.email %></p>
-                                <p class="card-text">Balance: $0.00</p>
-                                <p class="card-text">Account ID: <%- info.id %></p>
-                                <p>refferal code: <%= info.referral_code %></p>
-                                <p>Balance: <%= info.balance %></p>
-                                <p>Number of People You Have Referred: <%= referredCount %></p>
-                                <a href="/profile">profile</a>
-                                <a href="#" class="btn btn-primary">Edit Profile</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <div class="container mt-5">
+                      <div class="row justify-content-center">
+                          <div class="col-md-8">  <!-- Adjust column size as needed -->
+                              <div class="card">
+                                  <div class="card-header">
+                                      Account Details
+                                  </div>
+                                  <div class="card-body">
+                                      <div class="row">
+                                          <div class="col-md-4">
+                                              <img src="<%- info.profilePictureUrl || '/images/default-avatar.png' %>" alt="Profile Picture" class="profile-picture img-fluid">
+                                          </div>
+                                          <div class="col-md-8">
+                                              <h5 class="card-title">Welcome <%- info.lname %></h5>
+                                              <p class="card-text">Email: <%- info.email %></p>
+                                              <p class="card-text">Balance: $<%- infoBalance %></p>
+                                              <p>Referred Users: <%= referredCount %></p>
+                                              <p class="card-text">Account ID: <%- info.id %></p>
+                                              <a href="#" class="btn btn-primary">Edit Profile</a>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
     </div>
     <div id="referral-link-section">
         <p>Your referral link:</p>
-        '    '    <a href="/referral">refferral</a>
+        '    '    <a href="/link-telegram">link telegram</a>
 
         <input type="text" id="referral-link" value="http://localhost:3000/register?referral=<%= info.referral_code %>" readonly class="card col-6">
         <button id="copy-button">Copy Link</button>

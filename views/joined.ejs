@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Channel Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        .status-message {
+            font-size: 1.2em;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .joined {
+            color: green;
+            background-color: #d4edda;
+        }
+        .not-joined {
+            color: red;
+            background-color: #f8d7da;
+        }
+        a {
+            color: blue;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Telegram Channel Status</h1>
+
+    <div class="status-message <%= isMember ? 'joined' : 'not-joined' %>">
+        <% if (isMember) { %>
+            <p>You are a member of the Telegram channel! ✅</p>
+        <% } else { %>
+            <p>You are not a member of the Telegram channel. 😔</p>
+            <p>Please join to access the content: <a href="<%= channel %>" >Join the channel</a></p>
+        <% } %>
+    </div>
+</body>
+</html>

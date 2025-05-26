@@ -1,0 +1,36 @@
+<div class="telegram-connection-status">
+    <% if (!info.telegram_username) { %>
+      <!-- Not connected: show instructions -->
+      <div class="alert alert-info">
+        <strong>Connect Your Telegram Account!</strong>
+        <p>To complete this task, you need to connect your Telegram account.</p>
+        <ol>
+          <li>Start our Telegram bot: <a href="https://t.me/verifyusermembershipBot" name="link1" target="_blank">@verifyusermembershipBot</a></li>
+          <li>Send the <code>/connect</code> command to the bot.</li>
+          <li>Once connected, refresh this page to see your Telegram connection status.</li>
+        </ol>
+      </div>
+    <% } else { %>
+      <!-- Connected: show username -->
+      <div class="alert alert-success">
+        <strong>Telegram Account Connected!</strong>
+        <p>Your Telegram account (<strong>@<%= info.telegram_username %></strong>) is connected.</p>
+      </div>
+    <% } %>
+  </div>
+
+<form action="/link-telegram" method="POST">
+    <div>
+        <p>Copy your telegram user id from the bot and paste it here &#downarrow;</p>
+      <label for="telegram_user_id">Telegram User ID:</label>
+      <input type="text" name="telegram_user_id" id="telegram_user_id" required>
+    </div>
+    <div>
+        <p>copy you telegram user name from the bot and paste it here &#downarrow;</p>
+      <label for="telegram_username">Telegram Username:</label>
+      <input type="text" name="telegram_username" id="telegram_username" required>
+    </div>
+    <button type="submit">Link Telegram Account</button>
+  </form>
+  
+  

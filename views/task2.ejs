@@ -1,24 +1,33 @@
-<%-include ('header') -%>
-
-<h1 style="text-align: center;">COMPLETE THE TASK</h1>
-
-
-<div class="container">
-    <div class="form-control m-3">
-        <h2>TASK 1</h2>
-        <p>Description:     Kraven Kravinoff's complex relationship with his ruthless gangs most feared. </p>
-        <a href="https://t.me/bpay_coin_bot/bpay_mini_app?startapp=task_45_6294293419">Task One</a>
+<form action="/verify-task1" method="post">
+    <div class="container">
+      <h1>Task 1</h1>
+      <p>Description: Join this Telegram channel</p>
+      <a href="https://t.me/sfdxcgbhjklkhjghfgdjkbj" target="_blank">Join Telegram Channel</a>
+  
+      <!-- Telegram Connection Status -->
+      <div class="telegram-connection-status">
+        <% if (!info.telegram_username) { %>
+          <!-- Not connected: show instructions -->
+          <div class="alert alert-info">
+            <strong>Connect Your Telegram Account!</strong>
+            <p>To complete this task, you need to connect your Telegram account.</p>
+            <ol>
+              <li>Start our Telegram bot: <a href="https://t.me/verifyusermembershipBot" name="link1" target="_blank">@verifyusermembershipBot</a></li>
+              <li>Send the <code>/connect</code> command to the bot.</li>
+              <li>Once connected, refresh this page to see your Telegram connection status.</li>
+            </ol>
+          </div>
+        <% } else { %>
+          <!-- Connected: show username -->
+          <div class="alert alert-success">
+            <strong>Telegram Account Connected!</strong>
+            <p>Your Telegram account (<strong>@<%= info.telegram_username %></strong>) is connected.</p>
+          </div>
+        <% } %>
+      </div>
+  
+      <input type="submit" value="Verify" class="btn btn-primary" />
     </div>
-    
-    <div class="form-control m-3">
-        <h2>TASK 2</h2>
-        <p>Description:  Kraven Kravinoff's complex relationship with his ruthless gangs most feared.</p>
-    <a href="#">Task Two</a>
-    </div>
-    
-    <div class="form-control m-3">
-        <h2>TASK 3</h2>
-        <p>Description:  Kraven Kravinoff's complex relationship with his ruthless gangs most feared.        </p>
-    <a href="#">Task Three</a>
-    </div>
-</div>
+  </form>
+  
+  
