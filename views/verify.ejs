@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Verify PIN</title>
+</head>
+<body>
+  <h1>Enter the PIN sent to <%= phone %></h1>
+
+  <% if (error) { %>
+    <p style="color: red;"><%= error %></p>
+  <% } %>
+
+  <form action="/verify-pin" method="POST">
+    <input type="hidden" name="phone" value="<%= phone %>" />
+    <input type="hidden" name="pinId" value="<%= pinId %>" />
+
+    <input type="text" name="pin" placeholder="Enter PIN" required />
+    <button type="submit">Verify</button>
+  </form>
+</body>
+</html>

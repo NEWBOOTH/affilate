@@ -1,12 +1,13 @@
-<%-include ('head') -%>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Affiliate Registration</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link 
+    rel="stylesheet" 
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" 
+  />
   <style>
     .container {
       max-width: 500px;
@@ -15,18 +16,6 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-
-    .logo {
-      display: block;
-      margin: 0 auto;
-      max-width: 200px;
-      height: auto;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
     label {
       font-weight: bold;
     }
@@ -34,40 +23,95 @@
 </head>
 <body>
   <div class="container">
-    
     <h1>Register</h1>
     <form action="/register" method="post">
       <div class="form-group">
         <label for="fname">First Name:</label>
-        <input type="text" id="fname" name="fname" class="form-control" required>
+        <input 
+          type="text" 
+          id="fname" 
+          name="fname" 
+          class="form-control" 
+          required 
+          autocomplete="given-name"
+        />
       </div>
 
       <div class="form-group">
         <label for="lname">Last Name:</label>
-        <input type="text" id="lname" name="lname" class="form-control" required>
+        <input 
+          type="text" 
+          id="lname" 
+          name="lname" 
+          class="form-control" 
+          required 
+          autocomplete="family-name"
+        />
       </div>
 
       <div class="form-group">
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" class="form-control" required>
-      </div>
-     <div>
-      <label for="">telegram Username</label>
-      <input type="text" name="telegramUsername" id="">
-     </div>
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" class="form-control" required>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-control" 
+          required 
+          autocomplete="email"
+        />
       </div>
 
-      <!-- Display the referral code if available (coming from GET request) -->
+      <div class="form-group">
+        <label for="countryCode">Country Code:</label>
+        <select 
+          id="countryCode" 
+          name="countryCode" 
+          class="form-control" 
+          required
+        >
+          <option value="+1">🇺🇸 +1 (USA)</option>
+          <option value="+44">🇬🇧 +44 (UK)</option>
+          <option value="+233" selected>🇬🇭 +233 (Ghana)</option>
+          <option value="+91">🇮🇳 +91 (India)</option>
+          <!-- Add more countries here -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input 
+          type="tel" 
+          id="phone" 
+          name="phone" 
+          class="form-control" 
+          placeholder="123456789" 
+          pattern="\d{5,15}" 
+          title="Enter your phone number without country code" 
+          required 
+          autocomplete="tel"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="telegramUsername">Telegram Username:</label>
+        <input type="text" id="telegramUsername" name="telegramUsername"   class="form-control"    placeholder="@yourusername"    autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password"  id="password"  name="password" class="form-control" required  autocomplete="new-password"
+        />
+      </div>
+
+      <!-- Referral code field, rendered only if 'referral' variable exists on server -->
       <% if (referral) { %>
-        <div class="form-group">
-          <label for="referral">Referral Code:</label>
-          <input type="text" id="referral" name="referral" class="form-control" value="<%= referral %>" readonly>
-        </div>
+      <div class="form-group">
+        <label for="referral">Referral Code:</label>
+        <input type="text" id="referral" name="referral" class="form-control"  value="<%= referral %>" readonly/>
+      </div>
       <% } %>
-       <button type="submit" class="btn btn-primary">Register</button>
+
+      <button type="submit" class="btn btn-primary">Register</button>
     </form>
   </div>
   <p>If you already have an account <a href="/login" style="font-size: 25px;">Login</a> here</p>

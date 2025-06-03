@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Edit Account</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+  
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+  
+      form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 400px; /* Adjust as needed */
+        margin: 0 auto; /* Center the form */
+      }
+  
+      label {
+        display: block;
+        margin-bottom: 0.5em;
+        font-weight: bold;
+        color: #555;
+      }
+  
+      input[type="text"],
+      select {
+        width: 100%;
+        padding: 0.7em;
+        margin-bottom: 1em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+  
+      input[type="checkbox"] {
+        margin-right: 5px;
+      }
+  
+      label[for="verified"] { /* Style label containing checkbox */
+        display: inline-block; /* Allows label to wrap content */
+        font-weight: normal;    /* Reset font-weight for label */
+        margin-top: -10px;
+      }
+  
+      button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 0.8em 1.2em;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+      }
+  
+      button:hover {
+        background-color: #3e8e41;
+      }
+  
+      p {
+        text-align: center;
+      }
+  
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+  
+      a:hover {
+        text-decoration: underline;
+      }
+  
+      /* If you have a separate class for the error message */
+      .error {
+        color: red;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Edit Account</h1>
+  
+    <% if (user) { %>
+      <form action="/admin/edit/<%= user.id %>" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="<%= user.fname %>" required>
+        <label for="email">Email</label>
+        <input type="text" name="email" value="<%= user.email %>">
+
+        <label for="social_network">Social Network:</label>
+        <select id="social_network" name="social_network" required>
+          <option value="instagram" <%= user.social_network === 'instagram' ? 'selected' : '' %>>Instagram</option>
+          <option value="tiktok" <%= user.social_network === 'tiktok' ? 'selected' : '' %>>TikTok</option>
+        </select>
+  
+        <label>Referral Count: <%= user.referral_count || 0 %></label>
+        <label>Balance: </label>
+        <input type="text" name="balance" id="" value="<%= (typeof user.balance === 'number') ? user.balance.toFixed(2) : 'N/A' %>">
+  
+        <label for="verified">Verified:</label>
+        <input type="checkbox" id="verified" name="verified" <%= user.verified ? 'checked' : '' %>>
+  
+        <button type="submit">Save Changes</button>
+      </form>
+    <% } else { %>
+      <p class="error">Account not found.</p>
+    <% } %>
+  
+    <p><a href="/one">Back to Account List</a></p>
+  </body>
+  </html>
+  
