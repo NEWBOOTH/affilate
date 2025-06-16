@@ -21,7 +21,7 @@ const https = require('follow-redirects').https;
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
-
+app.use(express.static(path.join(__dirname, 'public')))
 // Configure multer storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -33,6 +33,7 @@ const storage = multer.diskStorage({
         cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
+const port = process.env.PORT || 5006
 
 const upload = multer({ 
     storage,
@@ -45,6 +46,8 @@ const upload = multer({
     }
 });
 
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'password';
 
 app.use(session({
   secret: 'secret',
@@ -63,13 +66,26 @@ app.use(session({
 //     database: 'affilate'
 //   }
 // });
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'affilate',
-  password: 'LMsbffmc',
-  port: 5432,
-});
+let pool;
+
+if (process.env.DATABASE_URL) {
+    // Running on Heroku or another environment with DATABASE_URL
+    pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false,  // Required for Heroku Postgres
+        },
+    });
+} else {
+    // Running locally (development)
+    pool = new Pool({
+        user: process.env.DB_USER || 'postgres',    // Use .env or default
+        host: process.env.DB_HOST || 'localhost',  // Use .env or default
+        database: process.env.DB_NAME || 'affilate', // Use .env or default
+        password: process.env.DB_PASSWORD,        // Use .env - DO NOT hardcode
+        port: process.env.DB_PORT || 5432,        // Use .env or default
+    });
+}
 
 function generateReferralCode() {
   return uuid.v4(); 
@@ -125,13 +141,28 @@ app.get('/tasks/:id', async (req, res) => {
 
     const userId = req.session?.user?.id;
 
-
+    if (!req.session.rewardClaimed) {
+      req.session.rewardClaimed = false;
+  }
+  if (!req.session.task4Completed) {
+    req.session.task4Completed = false;
+}
     // Optionally, fetch user info if needed
-    res.render('task2', { info });
+    res.render('task2', { info:info,rewardClaimed: req.session.rewardClaimed,task4Completed: req.session.task4Completed });
   } catch (err) {
     console.error('Error fetching task:', err);
     res.status(500).send('Server error.');
   }
+});
+
+app.post('/claim-reward', (req, res) => {
+  req.session.rewardClaimed = true; // Mark reward as claimed
+  res.redirect('/tasks');            // Redirect back to tasks or wherever appropriate
+});
+
+app.post('/mark/task4/complete', (req, res) => {
+req.session.task4Completed = true;  // Mark task4 as completed in session
+res.sendStatus(200);               // Respond with success status
 });
 async function isUserInChannel(userId) {
   try {
@@ -151,7 +182,7 @@ async function isUserInChannel(userId) {
 app.get('/task', function(req,res){
   res.render('task3')
 })
-// Dummy saveScreenshot function for demonstration
+
 async function saveScreenshot({ userId, filename, path }) {
   console.log(`Saving screenshot info to DB: userId=${userId}, filename=${filename}, path=${path}`);
   return new Promise((resolve) => setTimeout(resolve, 100));
@@ -179,8 +210,6 @@ app.post('/submit-screenshot', upload.single('upload'), async (req, res) => {
   }
 });
 
-
-
 app.get('/register', (req, res) => {
   // Extract the referral code from the query parameters
   const referral = req.query.referral;
@@ -188,6 +217,7 @@ app.get('/register', (req, res) => {
   // Render the registration form, passing the referral code
   res.render('register', { referral: referral });
 });
+
 app.post('/register', [
   body('fname').trim().isLength({ min: 1, max: 50 }).withMessage('First name must be between 1 and 50 characters'),
   body('lname').trim().isLength({ min: 1, max: 50 }).withMessage('Last name must be between 1 and 50 characters'),
@@ -251,18 +281,38 @@ app.post('/register', [
     res.status(500).send('Registration failed. Please try again.');
   }
 });
+
 function isAdmin(req, res, next) {
   if (req.session && req.session.adminUser) {
-    return next();
+      return next(); // User is admin, continue to route handler
+  } else {
+      // User is not admin, send an unauthorized response
+      return res.status(403).send('Unauthorized: Admin access required.');
   }
 }
-app.get('/admin', async (req, res) => {
-  try {
-    const result = await pool.query(`SELECT  a.*, COUNT(r.id) AS referral_count FROM  account a LEFT JOIN  account r ON r.referred_by_user_id = a.id  GROUP BY  a.id ORDER BY   a.id DESC`);
 
-const users = result.rows.map(user => {
-    return {...user, balance: Number(user.referral_count) * 0. };
-});
+app.get('/admin', isAdmin, async (req, res) => {
+  try {
+      const result = await pool.query(`
+          SELECT 
+              a.*, 
+              COUNT(r.id) AS referral_count
+          FROM 
+              account a
+          LEFT JOIN 
+              account r ON r.referred_by_user_id = a.id
+          GROUP BY 
+              a.id
+          ORDER BY 
+              a.id ASC
+      `);
+
+      const users = result.rows.map(user => {
+          return {
+              ...user,
+              balance: Number(user.referral_count) * 20
+          };
+      });
 
       res.render('admin', { users, adminUser: req.session.adminUser });
   } catch (error) {
@@ -270,7 +320,6 @@ const users = result.rows.map(user => {
       res.status(500).send('Internal Server Error');
   }
 });
-
 
 app.get('/link-telegram', async function(req,res){
 
@@ -339,6 +388,7 @@ app.post('/verify-task1', async (req, res) => {
     res.status(500).send("Error verifying membership.");
   }
 });
+
 app.get('/referral', async (req, res) => {
 
     if (!req.session.user) {
@@ -363,52 +413,7 @@ app.get('/referral', async (req, res) => {
 res.render('referral', { user:user })
 
 });
-app.get('/profile', async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.redirect('/login');
-    }
 
-    const userId = req.session.user.id;
-    if (isNaN(userId)) {
-      return res.status(400).send("Invalid user ID.");
-    }
-
-    // Fetch user profile data (you might already have this)
-    const userQuery = 'SELECT fname, lname, email FROM account WHERE id = $1';
-    const userValues = [userId];
-    const userResult = await pool.query(userQuery, userValues);
-
-    if (userResult.rows.length === 0) {
-      return res.status(404).send('User not found.');
-    }
-
-    const user = userResult.rows[0];
-
-    // Fetch the referral count for the user
-    const referralCountQuery = `
-      SELECT COUNT(*) AS referred_count
-      FROM account
-      WHERE referred_by_user_id = $1
-    `;
-    const referralCountValues = [userId];
-    const referralCountResult = await pool.query(referralCountQuery, referralCountValues);
-    const referredCount = referralCountResult.rows[0].referred_count; // Get the count
-
-
-    // Render the profile page, passing user data and the referral count
-    res.render('profile', {
-      fname: user.fname,
-      lname: user.lname,
-      email: user.email,
-      referredCount: referredCount
-    });
-
-  } catch (error) {
-    console.error('Error fetching profile data:', error);
-    res.status(500).send('Error fetching profile data.');
-  }
-});
 app.get('/login', async function(req,res){
   res.render('login')
 });
@@ -416,6 +421,7 @@ app.post('/login', async function(req, res) {
   try {
     const email = validator.normalizeEmail(req.body.email);
         const password = req.body.password;
+        const fname = req.body.fname;
 
     const result = await pool.query('SELECT * FROM account WHERE email = $1', [email]);
 
@@ -439,9 +445,9 @@ app.post('/login', async function(req, res) {
       return res.status(401).send('Invalid email or password'); // 401 Unauthorized
       }
   } catch (error) {
-    console.error('Error during login:', error);
-    res.status(500).send('Login failed.');
-    }
+      console.error('Error during login:', error);
+      res.status(500).send('Login failed.');
+  }
 });
 app.get('/logout', (req, res) => {
   req.session.destroy(() => {
@@ -449,9 +455,7 @@ app.get('/logout', (req, res) => {
   });
 });
 
-
-// Форма редактирования пользователя
-app.get('/admin/edit/:id', async function(req, res) {
+app.get('/admin/edit/account/:id', async function(req, res) {
   const id = req.params.id;
 
   try {
@@ -480,8 +484,24 @@ app.get('/admin/edit/:id', async function(req, res) {
     res.status(500).send('DB error');
   }
 });
+app.post('/admin/edit/account/:id', async (req, res) => {
+  const id = req.params.id;
+  const { fname, verified, balance, email } = req.body;
+  const verifiedInt = verified === 'on' ? 1 : 0;
 
-
+  try {
+    const sql = `
+      UPDATE account 
+      SET fname = $1, verified = $2, balance = $3, email = $4
+      WHERE id = $5
+    `;
+    await pool.query(sql, [fname, verifiedInt, balance, email, id]);
+    res.redirect('/admin');
+  } catch (err) {
+    console.error('DB error:', err);
+    res.status(500).send('DB error: ' + err.message);
+  }
+});
 
 app.get('/account/:id', async function(req, res) {
   try {
@@ -519,6 +539,50 @@ app.get('/account/:id', async function(req, res) {
     res.status(500).send('Error loading account information.');
   }
 });
+
+// app.get('/earnings/:id', async function(req,res){
+//   const id = parseInt(req.params.id);
+//   const query = 'SELECT * FROM account WHERE id = $1';
+//     const values = [id];
+//     const result = await pool.query(query, values); 
+//     const info = result.rows[0]
+//     res.render('earnings', {info:info})
+// })
+
+app.get('/earnings/:id', async (req, res) => {
+  try {
+    const accountId = req.params.id;
+
+    // Query to get the number of people referred by this user and tasks completed by this user
+    const mainQuery = `
+      SELECT
+        (SELECT COUNT(*) FROM account WHERE referred_by_user_id = $1) AS people_referred,
+        (SELECT COALESCE(SUM(tasks_completed), 0) FROM account WHERE id = $1) AS tasks_completed
+    `;
+
+    const result = await pool.query(mainQuery, [accountId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).send('No data found');
+    }
+
+    const data = result.rows[0];
+    const peopleReferred = parseInt(data.people_referred) || 0;
+    const tasksCompleted = parseInt(data.tasks_completed) || 0;
+    const total = peopleReferred + tasksCompleted;
+
+    // Render the EJS template with the data
+    res.render('earnings', {
+      referralCount: peopleReferred,
+      tasksCompleted: tasksCompleted,
+      total: total,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching data from the database');
+  }
+});
+
 
 app.get('/:id', async (req, res) => {
   try {
@@ -592,6 +656,6 @@ async function awardReferralBonus(refereeId) {
   }
 };
 
-app.listen(3000, function(){
-    console.log('http://localhost:3000/admin')
-});
+app.listen(port, () => {
+  console.log(`Listening on ${port}`)
+})

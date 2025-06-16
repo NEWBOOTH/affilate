@@ -3,13 +3,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <style>
-    #task3 a {
+ #task2 a {
   font-weight: 600;
   color: #0d6efd;
   text-decoration: none;
 }
 
-#task3 a:hover {
+ #task2 a:hover {
+  text-decoration: underline;
+}
+#task3 a {
+  font-weight: 600;
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+ #task3 a:hover {
   text-decoration: underline;
 }
 
@@ -25,10 +34,10 @@
                 href="https://t.me/sfdxcgbhjklkhjghfgdjkbj" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                class="channel-link d-inline-block mb-3">
+                class="channel-link d-inline-block mb-2">
                 Join Telegram Channel</a>
 
-            <form action="/verify-task1" method="post" class="mt-4 ">
+            <form action="/verify-task1" method="post" class="mt-1 ">
                 <section 
                     class="telegram-connection-status" 
                     aria-live="polite" 
@@ -67,10 +76,10 @@
         </section>
 <!-- Task 2 -->
 <section id="task2" class="form-control">
-    <h2>Task 2: Follow Instagram & Upload Screenshot</h2>
+    <h2>Task 2: Follow Instagram Account & Upload Screenshot</h2>
     <p>Please follow this Instagram account and upload a screenshot as proof:</p>
   
-    <a href="https://www.instagram.com/your_instagram_account" target="_blank" rel="noopener noreferrer" class="instagram-link d-inline-block mb-3">
+    <a href="https://www.instagram.com/your_instagram_account" target="_blank" rel="noopener noreferrer" class="instagram-link d-inline-block mb-1">
       @your_instagram_account
     </a>
   
@@ -104,12 +113,71 @@
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
   </section>
-  
- 
 
+  <section class="form-control">
+    <h2>TASK 4</h2>
+    <p>Play this audio, then claim your reward.</p>
+    <audio id="rewardAudio" controls>
+      <source src="/audio/A Dangerous Thing.m4a.mxx" type="audio/mpeg">
+      <source src="/audio/A Dangerous Thing.m4a.mxx" type="audio/mp4">  <!-- Add MP4 for broader compatibility -->
+      Your browser does not support the audio element.
+    </audio>
+    <a id="claimRewardLink" href="/reward.html" disabled aria-disabled="true">Claim Reward</a>
+  </section>
+
+  <section class="form-control mt-4">
+    <h2>TASK 5</h2>
+    <p>Listen to the following audio:</p>
+    <audio id="task4Audio" controls aria-label="Task 4 Audio" preload="metadata">
+        <source src="/audio/A Million Dreams.m4a.mxx" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+        <% if (!task4Completed) { %>
+    <button id="markTask4Button" class="btn btn-primary mt-2">Mark Task 4 Complete</button>
+    <% } else { %>
+<p class="text-success">Task 4 Completed!</p>
+<% } %>
+</section>
     </div>
 
     <!-- Bootstrap 5 JS Bundle with Popper (optional if you want dropdowns, modals, etc.) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+      document.addEventListener('DOMContentLoaded', function() {
+      const rewardAudio = document.getElementById('rewardAudio');
+      const claimRewardButton = document.getElementById('claimRewardButton');
+
+      // Disable the button initially
+      claimRewardButton.disabled = true;
+
+      // Event listener to enable the link after audio has been played
+      rewardAudio.addEventListener('ended', function() {
+          claimRewardButton.disabled = false;
+      });
+
+    // task 4
+
+    const task4Audio = document.getElementById('task4Audio');
+    const markTask4Button = document.getElementById('markTask4Button');
+
+    task4Audio.addEventListener("ended", () => {
+        markTask4Button.addEventListener("click", () => {
+          // Send AJAX request to the server to mark the task as complete
+          fetch('/mark/task4/complete', {
+              method: 'POST'
+          })
+          .then(response => {
+              if (response.ok) {
+                  // Reload the page to update the task status
+                  location.reload();
+              } else {
+                  console.error('Failed to mark task 4 as complete');
+              }
+          });
+        })
+
+    })
+  });
+    </script>
+    
 </body>
 </html>

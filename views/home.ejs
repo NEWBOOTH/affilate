@@ -1,29 +1,109 @@
-
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Dashboard</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #222; /* Dark background */
+      color: #fff; /* Light text */
+      margin: 0;
+      padding: 20px;
+    }
 
-  <title>Affiliate Products</title>
-  <link rel="stylesheet" href="/css/style.css"> <!-- Link to your CSS file -->
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;                /* Add flexbox */
+      flex-direction: column;       /* Stack items vertically */
+      min-height: 100vh;           /* Ensure the container takes up at least the full viewport height */
+    }
+
+    /* User Info Section */
+    .user-info {
+      background-color: #333;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #555;
+    }
+
+    .user-info h2 {
+      margin-top: 0;
+      color: #eee;
+    }
+
+    .user-info p {
+      color: #ccc;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex-grow: 1;              /* Allow the content to take up remaining space */
+      background-color: #444;       /* A slightly lighter shade for contrast */
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #666;
+      text-align: center;
+    }
+
+    /* Navigation Links */
+    .navigation {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .navigation a {
+      background-color: #007bff;
+      color: #fff;
+      padding: 12px 15px;
+      text-decoration: none;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      border: 1px solid #0056b3;
+    }
+
+    .navigation a:hover {
+      background-color: #0056b3;
+    }
+
+    .navigation i {
+      margin-right: 8px;
+      font-size: 1.2em;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<%-include ('header') -%>
-
 <body>
-  <h1>Affiliate Products</h1>
+  <div class="container">
+    <div class="user-info">
+      <h2>Welcome  <%= info.fname %></h2>
+      <p><%= info.email %></p>
+    </div>
 
+    <div class="main-content">
+      <h2>Welcome to your dashboard!</h2>
+      <p>This is where you can see your profile, tasks and earnings.</p>
+      <p>
+        <button>Click me!</button>
+      </p>
+    </div>
 
-
-<div class="m-3">
-      <div class="row">
-  <div class="col-4 card">
-    <p><%= info.lname %> <%= info.fname %></p>
-    <p><%= info.email %></p>
+    <nav class="navigation">
+      <a href="/tasks/<%= info.id %>"><i class="fas fa-tasks"></i> Tasks</a>
+      <a href="/earnings/<%= info.id %>"><i class="fas fa-chart-line"></i> Earnings</a>
+      <a href="/account/<%= info.id %>"><i class="fas fa-user"></i> Account</a>
+      <a href="#"><i class="fas fa-video"></i> Video</a>
+    </nav>
   </div>
-<div class="col-7 ms-3">
-
-</div>
-</div>
-
-</div>
 </body>
 </html>

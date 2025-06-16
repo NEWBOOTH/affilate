@@ -24,186 +24,17 @@
       padding: 2rem;
       transition: box-shadow 0.3s ease;
     }
-
-    .card:hover {
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-header {
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: #1f2937; /* dark slate */
-      border-bottom: none;
-      padding-bottom: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .profile-picture {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #3b82f6; /* blue-500 */
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-      transition: transform 0.3s ease;
-    }
-
-    .profile-picture:hover {
-      transform: scale(1.05);
-    }
-
-    h5.card-title {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #111827; /* gray-900 */
-    }
-
-    p.card-text,
-    p {
-      font-size: 1rem;
-      color: #4b5563; /* gray-600 */
-      margin-bottom: 0.5rem;
-    }
-
-    a.btn-primary {
-      background-color: #3b82f6;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      font-weight: 600;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    a.btn-primary:hover,
-    a.btn-primary:focus {
-      background-color: #2563eb;
-      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.5);
-      outline: none;
-      text-decoration: none;
-      color: #fff;
-    }
-
-    #referral-link-section {
-      margin-top: 2rem;
-      background: #e0e7ff; /* light indigo */
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
-    }
-
-    #referral-link-section p {
-      font-weight: 600;
-      color: #4338ca; /* indigo-700 */
-      margin-bottom: 1rem;
-    }
-
-    #referral-link-section a {
-      color: #4338ca;
-      font-weight: 600;
-      text-decoration: none;
-      margin-bottom: 1rem;
-      display: inline-block;
-    }
-
-    #referral-link-section a:hover,
-    #referral-link-section a:focus {
-      text-decoration: underline;
-      outline: none;
-    }
-
-    .input-group {
-      max-width: 100%;
-    }
-
-    input#referral-link {
-      border-radius: 8px 0 0 8px;
-      border: 1px solid #c7d2fe;
-      font-size: 1rem;
-      padding: 0.5rem 1rem;
-      color: #1e293b; /* slate-800 */
-      background-color: #f8fafc;
-      user-select: all;
-    }
-
-    input#referral-link:focus {
-      outline: 2px solid #4338ca;
-      background-color: #fff;
-    }
-
-    button#copy-button,
-    button#share-button {
-      border-radius: 0 8px 8px 0;
-      border: 1px solid #3b82f6;
-      background-color: #3b82f6;
-      color: white;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    button#copy-button:hover,
-    button#share-button:hover,
-    button#copy-button:focus,
-    button#share-button:focus {
-      background-color: #2563eb;
-      outline: none;
-    }
-
-    footer.footer {
-      background-color: #f3f4f6; /* gray-100 */
-      padding: 1rem 0;
-      text-align: center;
-      color: #6b7280; /* gray-500 */
-      font-size: 0.9rem;
-      margin-top: auto;
-      box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 576px) {
-      .profile-picture {
-        width: 80px;
-        height: 80px;
-      }
-
-      h5.card-title {
-        font-size: 1.25rem;
-      }
-
-      #referral-link-section {
-        padding: 1rem;
-      }
-
-      input#referral-link {
-        font-size: 0.9rem;
-      }
-
-      button#copy-button,
-      button#share-button {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
-      }
-    }
+    /* Add more specific styles here */
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
-      <div class="card-header">ACCOUNT</div>
+      <div class="card-header">ACCOUNT || <a href="/logout">Logout</a></div>
       <div class="card-body">
         <div class="row align-items-center">
           <div class="col-md-4 text-center mb-3 mb-md-0">
-            <img
-              src="<%- info.profilePictureUrl || '/images/default-avatar.png' %>"
-              alt="Profile Picture"
-              class="profile-picture img-fluid"
-            />
+            <img src="" alt="" style="font-size: 5rem;" class=" img-luid fas fa-user" />
           </div>
           <div class="col-md-8">
             <h5 class="card-title">Welcome <%- info.lname %></h5>
@@ -212,7 +43,6 @@
             <p>Referred Users: <%= referredCount %></p>
             <p class="card-text">Account ID: <%- info.id %></p>
             <a href="#" class="btn btn-primary mt-2">Edit Profile</a>
-            <a href="/logout">Logout</a>
           </div>
         </div>
       </div>
@@ -226,7 +56,7 @@
         <input
           type="text"
           id="referral-link"
-          value="http://localhost:3000/register?referral=<%= info.referral_code %>"
+          value="<%= `http://localhost:3000/register?referral=${encodeURIComponent(info.referral_code)}` %>"
           readonly
           aria-label="Referral link"
         />
@@ -238,7 +68,8 @@
         </button>
       </div>
     </div>
-  </div>
+
+
 
   <footer class="footer">
     <div class="container">
@@ -247,26 +78,38 @@
   </footer>
 
   <script>
-    // Copy referral link to clipboard
     document.getElementById('copy-button').addEventListener('click', () => {
       const referralInput = document.getElementById('referral-link');
-      referralInput.select();
-      referralInput.setSelectionRange(0, 99999); // For mobile devices
+      const referralLink = referralInput.value;
 
-      try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-          alert('Referral link copied to clipboard!');
-        } else {
-          alert('Failed to copy referral link.');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(referralLink)
+          .then(() => {
+            alert('Referral link copied to clipboard!');
+          })
+          .catch(err => {
+            console.error('Failed to copy referral link: ', err);
+            alert('Failed to copy referral link.');
+          });
+      } else {
+        referralInput.select();
+        referralInput.setSelectionRange(0, 99999);
+
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            alert('Referral link copied to clipboard!');
+          } else {
+            alert('Failed to copy referral link.');
+          }
+        } catch (err) {
+          console.error('Browser does not support copying: ', err);
+          alert('Browser does not support copying.');
         }
-      } catch (err) {
-        alert('Browser does not support copying.');
+        window.getSelection().removeAllRanges();
       }
-      window.getSelection().removeAllRanges();
     });
 
-    // Share referral link using Web Share API if available
     document.getElementById('share-button').addEventListener('click', async () => {
       const referralLink = document.getElementById('referral-link').value;
 
@@ -277,12 +120,14 @@
             url: referralLink,
           });
         } catch (err) {
+          console.error('Sharing cancelled or failed: ', err);
           alert('Sharing cancelled or failed.');
         }
       } else {
         alert('Web Share API not supported in this browser.');
       }
     });
+
   </script>
 </body>
 </html>

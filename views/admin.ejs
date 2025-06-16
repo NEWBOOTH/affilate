@@ -26,12 +26,12 @@
       <% users.forEach(user => { %>
         <tr>
           <td><%= user.id %></td>
-          <td><%= user.fname %></td>
+          <td><%= user.fname %>_<%= user.lname %></td>
           <td><%= user.email %></td>
           <td><%= user.verified ? 'Yes' : 'No' %></td>
           <td><%= user.referral_count || '-' %></td>
-          <td><%= typeof user.balance === 'number' ? user.balance.toFixed(2) : user.balance %></td>
-          <td><a href="/admin/edit/<%= user.id %>">Edit</a></td>
+          <td>$<%= typeof user.balance === 'number' ? user.balance.toFixed(2) : user.balance %></td>
+          <td><a href="/admin/edit/account/<%= user.id %>">Edit</a></td>
         </tr>
       <% }) %>
     </tbody>
